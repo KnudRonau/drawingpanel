@@ -1,6 +1,12 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
+import io.reactivex.rxjava3.core.Observable;
+
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 
 /**
@@ -16,12 +22,36 @@ import javax.swing.*;
 public class DrawingPanel extends JPanel {
 
 	private Drawing drawing;
+	private int startX;
+	private int startY;
+	private Observable<MouseEvent> mouseEventObservable;
 	
 
 	public DrawingPanel() {
 		drawing = new Drawing();
+		setBackground(Color.gray);
+
+		mouseEventObservable = Observable.create( emitter -> {
+			this.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mousePressed(MouseEvent e) {
+					emitter.onNext(e);
+				}
+			});
+			this.addMouseMotionListener(new MouseMotionAdapter() {
+				@Override
+				public void mouseDragged(MouseEvent e) {
+					emitter.onNext(e);
+				}
+			});
+		});
+
 	}
-	
+
+	public Observable<MouseEvent> getMouseEventObservable() {
+		return mouseEventObservable;
+	}
+
 	public void redraw() {
 		repaint();
 	}

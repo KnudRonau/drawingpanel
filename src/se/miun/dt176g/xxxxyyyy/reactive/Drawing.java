@@ -16,7 +16,11 @@ import java.awt.Graphics;
 
 
 public class Drawing implements Drawable {
+//	private DrawingPanel drawingPanel;
 
+	public Drawing() {
+//		drawingPanel = new DrawingPanel();
+	}
 
 	// private SomeContainer shapes;
 
