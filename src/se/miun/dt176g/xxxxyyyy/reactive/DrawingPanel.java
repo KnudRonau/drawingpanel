@@ -25,7 +25,7 @@ public class DrawingPanel extends JPanel {
 	private int startX;
 	private int startY;
 	private Observable<MouseEvent> mouseEventObservable;
-	
+
 
 	public DrawingPanel() {
 		drawing = new Drawing();

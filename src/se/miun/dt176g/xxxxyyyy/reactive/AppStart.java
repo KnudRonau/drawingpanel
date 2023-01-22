@@ -13,12 +13,12 @@ import javax.swing.SwingUtilities;
 public class AppStart {
 
 	public static void main(String[] args) {
-		
+		MainApplication.launch();
 		// Make sure GUI is created on the event dispatching thread
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new MainFrame().setVisible(true);
-			}
-		});
+//		SwingUtilities.invokeLater(new Runnable() {
+//			public void run() {
+//				new MainFrame().setVisible(true);
+//			}
+//		});
 	}
 }

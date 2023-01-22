@@ -4,7 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 
 /**
- * <h1>MainFrame</h1> 
+ * <h1>MainFrame</h1>
  * JFrame to contain the rest
  *
  * @author 	--Knud Ronau Larsen--
@@ -36,7 +36,7 @@ public class MainFrame extends JFrame {
 		drawingPanel.setBounds(0, 0, getWidth(), getHeight());
 		this.getContentPane().add(drawingPanel, BorderLayout.CENTER);
 
-		this.setJMenuBar(new Menu(this));
+		//this.setJMenuBar(new Menu(this));
 
 	}
 

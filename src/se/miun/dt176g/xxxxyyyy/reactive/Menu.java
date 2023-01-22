@@ -8,7 +8,7 @@ import java.awt.*;
 
 
 /**
- * <h1>Menu</h1> 
+ * <h1>Menu</h1>
  *
  * @author 	--Knud Ronau Larsen--
  * @version 1.0
@@ -23,11 +23,11 @@ public class Menu extends JMenuBar {
 	private static Shape currentShape;
 	private static int thickness;
 
-	
+
 	public Menu(MainFrame frame) {
 		init(frame);
 	}
-	
+
 	private void init(MainFrame frame) {
 
 		JMenu menuAttributes;
@@ -55,7 +55,7 @@ public class Menu extends JMenuBar {
 		menuItemShapes = new JMenuItem("Rectangle");
 		menuItemShapes.addActionListener(e -> shapeEvent(Shape.RECTANGLE));
 		menuShapes.add(menuItemShapes);
-		
+
 		menuItemShapes = new JMenuItem("Oval");
 		menuItemShapes.addActionListener(e -> shapeEvent(Shape.OVAL));
 		menuShapes.add(menuItemShapes);
@@ -103,17 +103,17 @@ public class Menu extends JMenuBar {
 	}
 
 	private void anEvent(MainFrame frame) {
-	
+
 		String message = (String) JOptionPane.showInputDialog(frame,
 				"Send message to everyone:");
-		
+
 		if(message != null && !message.isEmpty()) {
 			JOptionPane.showMessageDialog(frame, message);
 		}
 	}
-	
+
 	private void anotherEvent(MainFrame frame) {
-		
+
 	}
 
 }
