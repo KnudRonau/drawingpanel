@@ -2,6 +2,7 @@ package se.miun.dt176g.xxxxyyyy.reactive;
 
 
 import java.awt.Graphics;
+import java.util.ArrayList;
 
 
 /**
@@ -15,11 +16,12 @@ import java.awt.Graphics;
  */
 
 
-public class Drawing implements Drawable {
+public class Drawings {
 //	private DrawingPanel drawingPanel;
+	private ArrayList<Shape> drawingsList;
 
-	public Drawing() {
-//		drawingPanel = new DrawingPanel();
+	public Drawings() {
+		drawingsList = new ArrayList<>();
 	}
 
 	// private SomeContainer shapes;
@@ -31,13 +33,12 @@ public class Drawing implements Drawable {
 	 * @param s a {@link Shape} object.
 	 */
 	public void addShape(Shape s) {
-		
+		drawingsList.add(s);
 	}
 
-
-	@Override
 	public void draw(Graphics g) {
-
+		for (Shape s : drawingsList) { s.draw();
+		}
 		// iterate over all shapes and draw them using the draw-method found in
 		// each concrete subclass.
 	}

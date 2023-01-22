@@ -26,14 +26,18 @@ import java.util.PrimitiveIterator;
 
 
 public class MainApplication extends Application {
+    private Canvas canvas;
     private GraphicsContext gc;
     private CustomLine customLine;
     private CustomRectangle customRectangle;
     private CustomOval customOval;
+    private Freehand freehand;
     private ToggleButton lineButton;
     private ToggleButton rectangleButton;
     private ToggleButton ovalButton;
     private ToggleButton freehandButton;
+
+
 
     public static void main(String[] args) {
         launch(args);
@@ -43,7 +47,7 @@ public class MainApplication extends Application {
 
         stage.setTitle("Drawing Area");
 
-        Canvas canvas = new Canvas(1200, 800);
+        canvas = new Canvas(1200, 800);
         gc = canvas.getGraphicsContext2D();
         BorderPane root = new BorderPane();
 
@@ -66,8 +70,11 @@ public class MainApplication extends Application {
                 .filter(e -> ovalButton.isSelected())
                 .subscribe(this::oval);
 
+        Observable.merge(mousePressed, mouseReleased, mouseDragged)
+                .filter(e -> freehandButton.isSelected())
+                .subscribe(this::freehand);
 
-        CustomLine testerLine = new CustomLine();
+
 //        mouseDragged.subscribe(s -> System.out.println(s.getX() + " " + s.getY()));
         mousePressed.subscribe(s -> System.out.println(s.getX()+ " " + s.getY()));
         mouseReleased.subscribe(s -> System.out.println(s.getX() + " " + s.getY()));
@@ -75,6 +82,22 @@ public class MainApplication extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void freehand(MouseEvent mouseEvent) {
+        if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
+            freehand = new Freehand(gc);
+            freehand.addPoint(makeToPoint(mouseEvent));
+        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_DRAGGED)) {
+            freehand.addPoint(makeToPoint(mouseEvent));
+        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
+            freehand.addPoint(makeToPoint(mouseEvent));
+            freehand.draw();
+        }
+    }
+
+    private Point makeToPoint(MouseEvent mouseEvent) {
+        return new Point((int)mouseEvent.getX(), (int)mouseEvent.getY());
     }
 
     private void line(MouseEvent mouseEvent) {
@@ -123,8 +146,8 @@ public class MainApplication extends Application {
         freehandButton.setToggleGroup(shapeButtons);
 
         Button colorButton = new Button("Change color!");
-        Observable<ActionEvent> colorE = JavaFxObservable.actionEventsOf(colorButton);
-        colorE.subscribe(e -> {
+        Observable<ActionEvent> colorEvent = JavaFxObservable.actionEventsOf(colorButton);
+        colorEvent.subscribe(e -> {
             if(gc.getStroke().equals(Color.BLACK)) {
                 gc.setStroke(Color.WHITE);
             } else {
@@ -133,8 +156,8 @@ public class MainApplication extends Application {
         });
 
         Button thicknessButton = new Button("Change thickness!");
-        Observable<ActionEvent> thicknessE = JavaFxObservable.actionEventsOf(thicknessButton);
-        thicknessE.subscribe(event -> {
+        Observable<ActionEvent> thicknessEvent = JavaFxObservable.actionEventsOf(thicknessButton);
+        thicknessEvent.subscribe(event -> {
             TextInputDialog thicknessDialog = new TextInputDialog();
             thicknessDialog.setTitle("Input the desired thickness!");
             try {
@@ -145,6 +168,9 @@ public class MainApplication extends Application {
         });
 
         Button clearButton = new Button("Clear canvas!");
+        Observable<ActionEvent> clearEvent = JavaFxObservable.actionEventsOf(clearButton);
+        clearEvent.subscribe(event -> gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()));
+
         buttonBox.getChildren().addAll(rectangleButton, ovalButton, lineButton,
                 freehandButton, colorButton, thicknessButton, clearButton);
 

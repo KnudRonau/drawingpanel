@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 
 /**
@@ -21,14 +20,14 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
 
-	private Drawing drawing;
+	private Drawings drawings;
 	private int startX;
 	private int startY;
 	private Observable<MouseEvent> mouseEventObservable;
 
 
 	public DrawingPanel() {
-		drawing = new Drawing();
+		drawings = new Drawings();
 		setBackground(Color.gray);
 
 		mouseEventObservable = Observable.create( emitter -> {
@@ -56,20 +55,20 @@ public class DrawingPanel extends JPanel {
 		repaint();
 	}
 
-	public void setDrawing(Drawing d) {
-		drawing = d;
+	public void setDrawing(Drawings d) {
+		drawings = d;
 		repaint();
 	}
 
-	public Drawing getDrawing() {
-		return drawing;
+	public Drawings getDrawing() {
+		return drawings;
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 
 		super.paintComponent(g);
-		drawing.draw(g);
+		drawings.draw(g);
 	}
 
 }
