@@ -17,8 +17,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
-
-
 public class MainApplication extends Application {
     private Canvas canvas;
     private GraphicsContext gc;
@@ -31,8 +29,6 @@ public class MainApplication extends Application {
     private ToggleButton rectangleButton;
     private ToggleButton ovalButton;
     private ToggleButton freehandButton;
-
-
 
     public static void main(String[] args) {
         launch(args);
@@ -54,22 +50,6 @@ public class MainApplication extends Application {
         Observable<MouseEvent> mouseDragged = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_DRAGGED);
         Observable<MouseEvent> mouseReleased = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_RELEASED);
 
-//        Observable.merge(mousePressed, mouseReleased, mouseDragged)
-//                .filter(e -> lineButton.isSelected())
-//                .subscribe(this::line);
-//
-//        Observable.merge(mousePressed, mouseReleased, mouseDragged)
-//                .filter(e -> rectangleButton.isSelected())
-//                .subscribe(this::rectangle);
-//
-//        Observable.merge(mousePressed, mouseReleased, mouseDragged)
-//                .filter(e -> ovalButton.isSelected())
-//                .subscribe(this::oval);
-//
-//        Observable.merge(mousePressed, mouseReleased, mouseDragged)
-//                .filter(e -> freehandButton.isSelected())
-//                .subscribe(this::freehand);
-
         Observable.merge(mousePressed, mouseReleased, mouseDragged)
                 .subscribe(e -> {
                     if(lineButton.isSelected()) {
@@ -82,7 +62,6 @@ public class MainApplication extends Application {
                         freehand(e);
                     }
                 });
-
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
