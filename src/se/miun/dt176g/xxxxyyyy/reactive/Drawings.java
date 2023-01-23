@@ -36,7 +36,11 @@ public class Drawings {
 		drawingsList.add(s);
 	}
 
-	public void draw(Graphics g) {
+	public void emptyDrawings() {
+		drawingsList.clear();
+	}
+
+	public void draw() {
 		for (Shape s : drawingsList) { s.draw();
 		}
 		// iterate over all shapes and draw them using the draw-method found in

@@ -20,14 +20,14 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class DrawingPanel extends JPanel {
 
-	private Drawings drawings;
+//	private Drawings drawings;
 	private int startX;
 	private int startY;
 	private Observable<MouseEvent> mouseEventObservable;
 
 
 	public DrawingPanel() {
-		drawings = new Drawings();
+//		drawings = new Drawings();
 		setBackground(Color.gray);
 
 		mouseEventObservable = Observable.create( emitter -> {
@@ -56,19 +56,19 @@ public class DrawingPanel extends JPanel {
 	}
 
 	public void setDrawing(Drawings d) {
-		drawings = d;
+//		drawings = d;
 		repaint();
 	}
 
-	public Drawings getDrawing() {
-		return drawings;
-	}
+//	public Drawings getDrawing() {
+//		return drawings;
+//	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 
 		super.paintComponent(g);
-		drawings.draw(g);
+//		drawings.draw(g);
 	}
 
 }
