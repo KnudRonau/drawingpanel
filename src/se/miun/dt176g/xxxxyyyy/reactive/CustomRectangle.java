@@ -4,32 +4,14 @@ import javafx.scene.canvas.GraphicsContext;
 
 public class CustomRectangle extends Shape{
 
-    public CustomRectangle(GraphicsContext graphicsContext) {
-        super(graphicsContext);
-    }
-
-    public void setFirstCoords(double x1, double y1) {
-        this.x1 = x1;
-        this.y1 = y1;
-    }
-
-    public void setSecondCoords(double x2, double y2) {
-        this.x2 = x2;
-        this.y2 = y2;
+    public CustomRectangle(Point firstPoint, Point secondPoint, GraphicsContext graphicsContext) {
+        super(firstPoint, secondPoint, graphicsContext);
     }
 
     @Override
     public void draw() {
-        if(x2 < x1) {
-            double temp = x1;
-            x1 = x2;
-            x2 = temp;
-        }
-        if(y2 < y1) {
-            double temp = y1;
-            y1 = y2;
-            y2 = temp;
-        }
-        graphicsContext.strokeRect(x1, y1,x2-x1, y2-y1);
+        fixCoordsForDrawing();
+        graphicsContext.strokeRect(firstPoint.x(), firstPoint.y(),
+                secondPoint.x() - firstPoint.x(), secondPoint.y() - firstPoint.y());
     }
 }

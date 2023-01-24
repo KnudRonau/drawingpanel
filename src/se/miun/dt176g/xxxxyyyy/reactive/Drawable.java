@@ -11,5 +11,5 @@ package se.miun.dt176g.xxxxyyyy.reactive;
 
 @FunctionalInterface
 interface Drawable {
-	void draw(java.awt.Graphics g);
+	void draw();
 }

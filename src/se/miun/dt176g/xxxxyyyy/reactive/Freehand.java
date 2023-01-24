@@ -5,23 +5,17 @@ import javafx.scene.canvas.GraphicsContext;
 import java.util.ArrayList;
 
 public class Freehand  extends Shape {
-
     private ArrayList<Point> dots;
 
-    Freehand(GraphicsContext graphicsContext) {
+    Freehand(ArrayList<Point> dots, GraphicsContext graphicsContext) {
         super(graphicsContext);
-        dots = new ArrayList<>();
+        this.dots = dots;
     }
-
-    public void addPoint(Point point) {
-        dots.add(point);
-    }
-
 
              @Override
     public void draw() {
-                 for(int i = 0; i + 1 < dots.size(); i++) {
-                     graphicsContext.strokeLine(dots.get(i).x(), dots.get(i).y(),dots.get(i+1).x(),dots.get(i+1).y());
-                 }
+        for(int i = 0; i + 1 < dots.size(); i++) {
+            graphicsContext.strokeLine(dots.get(i).x(), dots.get(i).y(),dots.get(i+1).x(),dots.get(i+1).y());
+        }
     }
 }

@@ -17,18 +17,19 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
+import java.util.ArrayList;
+
 public class MainApplication extends Application {
     private Canvas canvas;
-    private GraphicsContext gc;
-    private Drawings drawings;
-    private CustomLine customLine;
-    private CustomRectangle customRectangle;
-    private CustomOval customOval;
-    private Freehand freehand;
     private ToggleButton lineButton;
     private ToggleButton rectangleButton;
     private ToggleButton ovalButton;
     private ToggleButton freehandButton;
+    private GraphicsContext gc;
+    private Drawings drawings;
+    private Point firstPoint;
+    private ArrayList<Point> dots;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -70,13 +71,13 @@ public class MainApplication extends Application {
 
     private void freehand(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            freehand = new Freehand(gc);
-            freehand.addPoint(makeToPoint(mouseEvent));
+            dots = new ArrayList<>();
+            dots.add(makeToPoint(mouseEvent));
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_DRAGGED)) {
-            freehand.addPoint(makeToPoint(mouseEvent));
+            dots.add(makeToPoint(mouseEvent));
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            freehand.addPoint(makeToPoint(mouseEvent));
-            freehand.draw();
+            dots.add(makeToPoint(mouseEvent));
+            drawings.addShape(new Freehand(dots, gc));
         }
     }
 
@@ -86,31 +87,25 @@ public class MainApplication extends Application {
 
     private void line(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            customLine = new CustomLine(gc);
-            customLine.setFirstCoords(mouseEvent.getX(), mouseEvent.getY());
+            firstPoint = makeToPoint(mouseEvent);
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            customLine.setSecondCoords(mouseEvent.getX(), mouseEvent.getY());
-            customLine.draw();
+            drawings.addShape(new CustomLine(firstPoint, makeToPoint(mouseEvent), gc));
         }
     }
 
     private void rectangle(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            customRectangle = new CustomRectangle(gc);
-            customRectangle.setFirstCoords(mouseEvent.getX(), mouseEvent.getY());
+            firstPoint = makeToPoint(mouseEvent);
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            customRectangle.setSecondCoords(mouseEvent.getX(), mouseEvent.getY());
-            customRectangle.draw();
+            drawings.addShape(new CustomRectangle(firstPoint, makeToPoint(mouseEvent), gc));
         }
     }
 
     private void oval(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            customOval = new CustomOval(gc);
-            customOval.setFirstCoords(mouseEvent.getX(), mouseEvent.getY());
+            firstPoint = makeToPoint(mouseEvent);
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            customOval.setSecondCoords(mouseEvent.getX(), mouseEvent.getY());
-            customOval.draw();
+            drawings.addShape(new CustomOval(firstPoint, makeToPoint(mouseEvent), gc));
         }
     }
 

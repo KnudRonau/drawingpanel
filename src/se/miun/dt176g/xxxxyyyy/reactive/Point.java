@@ -1,7 +1,5 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
-
-
 /**
  * <h1>Point</h1> 
  *
