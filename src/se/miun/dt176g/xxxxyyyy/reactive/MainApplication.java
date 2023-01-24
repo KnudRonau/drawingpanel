@@ -19,6 +19,15 @@ import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
 import java.util.ArrayList;
 
+/**
+ * <h1>MainApplication</h1> Acts as the programs starting point and GUI.
+ *
+ * Extends JavaFx' {@link Application} class.
+ *
+ * @author 	--Knud Ronau Larsen--
+ * @version 1.0
+ * @since 	2022-01-20
+ */
 public class MainApplication extends Application {
     private Canvas canvas;
     private ToggleButton lineButton;
@@ -30,27 +39,37 @@ public class MainApplication extends Application {
     private Point firstPoint;
     private ArrayList<Point> dots;
 
-
+    /**
+     * The programs main method. Starts the program and launches the GUI.
+     * @param args provided arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
+
+    /**
+     * Sets up the GUI, creates Observable events and subscribes relevant method to emission based.
+     * @param stage GUI stage.
+     */
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
 
+        //Sets up a canvas and instantiates relevant fields
         stage.setTitle("Drawing Area");
-
+        drawings = new Drawings();
         canvas = new Canvas(1200, 800);
         gc = canvas.getGraphicsContext2D();
-        drawings = new Drawings();
         BorderPane root = new BorderPane();
-
         root.setCenter(canvas);
+        //adds toggleButtons and regular buttons to the BorderPane
         root.setTop(addButtons());
 
+        //Handles MouseEvents as Observable using JavaFxObservable
         Observable<MouseEvent> mousePressed = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_PRESSED);
         Observable<MouseEvent> mouseDragged = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_DRAGGED);
         Observable<MouseEvent> mouseReleased = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_RELEASED);
 
+        //Subscribes correct function to the emission based on currently toggled toggleButton
         Observable.merge(mousePressed, mouseReleased, mouseDragged)
                 .subscribe(e -> {
                     if(lineButton.isSelected()) {
@@ -69,6 +88,10 @@ public class MainApplication extends Application {
         stage.show();
     }
 
+    /**
+     * creates a new {@link Freehand} object and adds it to the {@link Drawings} container
+     * @param mouseEvent provided mouseEvent
+     */
     private void freehand(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             dots = new ArrayList<>();
@@ -81,10 +104,19 @@ public class MainApplication extends Application {
         }
     }
 
+    /**
+     * Parses the Coordinates from a mouseEvent to a Point.
+     * @param mouseEvent provided mouseEvent.
+     * @return a Point based on coords from mouseEvent.
+     */
     private Point makeToPoint(MouseEvent mouseEvent) {
         return new Point((int)mouseEvent.getX(), (int)mouseEvent.getY());
     }
 
+    /**
+     * creates a new {@link CustomLine} object and adds it to the {@link Drawings} container
+     * @param mouseEvent provided mouseEvent
+     */
     private void line(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             firstPoint = makeToPoint(mouseEvent);
@@ -93,6 +125,10 @@ public class MainApplication extends Application {
         }
     }
 
+    /**
+     * creates a new {@link CustomRectangle} object and adds it to the {@link Drawings} container
+     * @param mouseEvent provided mouseEvent
+     */
     private void rectangle(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             firstPoint = makeToPoint(mouseEvent);
@@ -101,6 +137,10 @@ public class MainApplication extends Application {
         }
     }
 
+    /**
+     * creates a new {@link CustomOval} object and adds it to the {@link Drawings} container
+     * @param mouseEvent provided mouseEvent
+     */
     private void oval(MouseEvent mouseEvent) {
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
             firstPoint = makeToPoint(mouseEvent);
@@ -109,11 +149,16 @@ public class MainApplication extends Application {
         }
     }
 
+    /**
+     * Creates all necessary buttons and add functionality to them
+     * @return a HBox containing all the buttons
+     */
     private HBox addButtons() {
 
         HBox buttonBox = new HBox();
         ToggleGroup shapeButtons = new ToggleGroup();
 
+        //create all the ToggleButtons and add them to the ToggleGroup
         rectangleButton = new ToggleButton("Rectangle");
         rectangleButton.setToggleGroup(shapeButtons);
         rectangleButton.setSelected(true);
@@ -124,6 +169,7 @@ public class MainApplication extends Application {
         freehandButton = new ToggleButton("Freehand");
         freehandButton.setToggleGroup(shapeButtons);
 
+        //Change drawing color when an ActionEvent is emitted from the colorButton
         Button colorButton = new Button("Change color!");
         Observable<ActionEvent> colorEvent = JavaFxObservable.actionEventsOf(colorButton);
         colorEvent.subscribe(e -> {
@@ -134,6 +180,7 @@ public class MainApplication extends Application {
             }
         });
 
+        //Prompt the user for a desired thickness when an ActionEvent is emitted by the thicknessButton
         Button thicknessButton = new Button("Change thickness!");
         Observable<ActionEvent> thicknessEvent = JavaFxObservable.actionEventsOf(thicknessButton);
         thicknessEvent.subscribe(event -> {
@@ -146,6 +193,7 @@ public class MainApplication extends Application {
             }
         });
 
+        //Clear the canvas and container when an ActionEvent is emitted from the clearButton
         Button clearButton = new Button("Clear canvas!");
         Observable<ActionEvent> clearEvent = JavaFxObservable.actionEventsOf(clearButton);
         clearEvent.subscribe(event -> {
@@ -153,6 +201,7 @@ public class MainApplication extends Application {
             drawings.emptyDrawings();
         });
 
+        //Add all buttons to the HBox
         buttonBox.getChildren().addAll(rectangleButton, ovalButton, lineButton,
                 freehandButton, colorButton, thicknessButton, clearButton);
 

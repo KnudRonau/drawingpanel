@@ -1,7 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 /**
- * <h1>Point</h1> 
+ * <h1>Point</h1> Helper class to create (x,y) coordinates as objects and easily manipulate them.
  *
  * @author 	--Knud Ronau Larsen--
  * @version 1.0

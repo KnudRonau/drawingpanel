@@ -1,8 +1,8 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 /**
- * <h1>Drawable</h1>
- * <p>
+ * <h1>Drawable</h1> Interface implemented by {@link Shape}.
+ *
  * 
  * @author 	--Knud Ronau Larsen--
  * @version 1.0
