@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
 import io.reactivex.rxjava3.subjects.Subject;
+import javafx.application.Application;
 import se.miun.dt176g.xxxxyyyy.reactive.shapes.Shape;
 
 
@@ -17,8 +18,19 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <h1>ReactiveServer</h1> Acts as server which clients can connect to.
+ *  Heavily inspired by Gustaf Holst's client.
+ *
+ * @author 	--Knud Ronau Larsen--
+ * @version 2.0
+ * @since 	2022-01-27
+ */
 public class ReactiveServer {
 
+    /**
+     * Helper class til assist with error handling
+     */
     public class ConnectError extends Throwable {
         @Serial
         private static final long serialVersionUID = 1L;
@@ -40,6 +52,10 @@ public class ReactiveServer {
     private boolean acceptConnections = true;
 
 
+    /**
+     * Starting point of server, starts server and provides method to shut down.
+     * @param args provided arguments
+     */
     public static void main(String[] args) {
 
         try {
@@ -65,11 +81,14 @@ public class ReactiveServer {
         }
     }
 
+    /**
+     * Instantiates Subjects and handling of incoming connections
+     */
     private void run() {
         disposables = new HashMap<>();
         shapeDisposables = new HashMap<>();
         connections = PublishSubject.create();
-        shapeStream = ReplaySubject.createWithSize(100);  //replay 3 last messages to new clients
+        shapeStream = ReplaySubject.createWithSize(100);  //replay last 100 shapes to new clients
 
         // listen for requests on separate thread
         Completable.create(emitter -> listenForIncomingConnectionRequests())
@@ -81,6 +100,10 @@ public class ReactiveServer {
                 .subscribe(this::listenToSocket);
     }
 
+    /**
+     * Accepts incoming connections
+     * @throws IOException exception thrown
+     */
     private void listenForIncomingConnectionRequests() throws IOException {
         serverSocket = new ServerSocket(12345);
 
@@ -93,9 +116,14 @@ public class ReactiveServer {
 
     }
 
+    /**
+     * Handles incoming shapes and send them to all clients via shape stream
+     * @param socket socket from client
+     */
     private void listenToSocket(Socket socket) {
-        //inject all incoming messages from this socket to the message stream
+        //inject all incoming shapes from this socket to the shape stream
 
+        //receive Shape objects from sockets
         Observable.<Shape>create(emitter -> {
             Observable.just(socket)
                     .map(Socket::getInputStream)
@@ -112,6 +140,7 @@ public class ReactiveServer {
                         }
                     }, err -> System.err.println(err.getMessage()));
         })
+                //Inject shape objects to the shape stream
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe(d -> disposables.put(socket.hashCode(), d))
                 .doOnError(this::handleError)
@@ -120,31 +149,44 @@ public class ReactiveServer {
                         err -> System.err.println(err.getMessage()),
                         () -> System.out.println("Socket closed"));
 
-            shapeStream
-                    .subscribeOn(Schedulers.io())
-                    .doOnSubscribe(d -> shapeDisposables.put(socket.hashCode(), d))
-                    .withLatestFrom(socketToObjectOutputStream(socket), (s, oos) -> {
-                        try {
-                            oos.writeObject(s);
-                            oos.flush();
-                        }catch (SocketException e) {
-                            e.printStackTrace();
-                        }
-                        return true;
-                    })
-                    .subscribe();
+        //Output the stream to clients
+        shapeStream
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe(d -> shapeDisposables.put(socket.hashCode(), d))
+                .withLatestFrom(socketToObjectOutputStream(socket), (s, oos) -> {
+                    try {
+                        oos.writeObject(s);
+                        oos.flush();
+                    }catch (SocketException e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                })
+                .subscribe();
     }
 
+    /**
+     * Logic to return an Observable<ObjectOutputStream> from Socket
+     * @param socket provided socket
+     * @return Observable<ObjectOutputStream>
+     */
     Observable<ObjectOutputStream> socketToObjectOutputStream(Socket socket) {
         return Observable.just(socket)
                 .map(Socket::getOutputStream)
                 .map(ObjectOutputStream::new);
     }
 
+    /**
+     * Stops incoming sockets
+     */
     private void shutdown() {
         acceptConnections = false;
     }
 
+    /**
+     * Helper method for handling errors
+     * @param error errors to handle
+     */
     private void handleError(Throwable error) {
         if (error instanceof ConnectError) {
             Socket socket = ((ConnectError) error).getSocket();

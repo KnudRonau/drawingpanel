@@ -54,7 +54,7 @@ public class MainApplication extends Application {
     }
 
     /**
-     * Sets up the GUI, creates Observables and subscribes relevant method to emissions.
+     * Sets up the GUI, creates Observables and subscribes relevant methods to emissions.
      * @param stage GUI stage.
      */
     @Override
@@ -99,6 +99,10 @@ public class MainApplication extends Application {
         stage.show();
     }
 
+    /**
+     * Parses mouseEvent on for shape creation
+     * @param mouseEvent merged mouseEvent
+     */
     private void createShape(MouseEvent mouseEvent) {
         if(freehandButton.isSelected()) {
             freehand(mouseEvent);
@@ -107,17 +111,26 @@ public class MainApplication extends Application {
         }
     }
 
+    /**
+     * Method to draw a shape in the gui
+     * @param shape shape to be drawn
+     */
     private void draw(Shape shape) {
         shape.draw(gc);
     }
 
+    /**
+     * Method to output a shape to the server
+     * @param shape shape to be sent to server
+     * @throws IOException throws IOExceptions
+     * @throws RuntimeException throw RuntimeExceptions
+     */
     private void sendToServer(Shape shape) throws IOException, RuntimeException {
         objectOutputStream.writeObject(shape);
-        objectOutputStream.reset();
     }
 
     /**
-     * creates a new {@link Freehand} object and adds it to the {@link Drawings} container
+     * creates a new {@link Freehand} object parses send it to the server
      * @param mouseEvent provided mouseEvent
      */
     private void freehand(MouseEvent mouseEvent) {
@@ -145,6 +158,10 @@ public class MainApplication extends Application {
         return new Point((int)mouseEvent.getX(), (int)mouseEvent.getY());
     }
 
+    /**
+     * Creates a Shape from the provided mouseEvent based on toggled button and sends it to the server.
+     * @param mouseEvent mouseEvent from which we extract either first coords or last coords.
+     */
     private void twoPointShape(MouseEvent mouseEvent) {
         TwoPointShape twoPointShape = null;
         if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
@@ -175,7 +192,7 @@ public class MainApplication extends Application {
         HBox buttonBox = new HBox();
         ToggleGroup shapeButtons = new ToggleGroup();
 
-        //create all the ToggleButtons and add them to the ToggleGroup
+        //Create all the ToggleButtons and add them to the ToggleGroup
         rectangleButton = new ToggleButton("Rectangle");
         rectangleButton.setToggleGroup(shapeButtons);
         rectangleButton.setSelected(true);
