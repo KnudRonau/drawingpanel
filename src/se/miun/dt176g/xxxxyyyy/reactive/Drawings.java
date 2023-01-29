@@ -1,6 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 import javafx.scene.canvas.GraphicsContext;
+import se.miun.dt176g.xxxxyyyy.reactive.shapes.Shape;
 
 import java.util.ArrayList;
 

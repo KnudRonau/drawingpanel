@@ -1,4 +1,4 @@
-package se.miun.dt176g.xxxxyyyy.reactive;
+package se.miun.dt176g.xxxxyyyy.reactive.shapes;
 
 import javafx.scene.canvas.GraphicsContext;
 

@@ -1,4 +1,4 @@
-package se.miun.dt176g.xxxxyyyy.reactive;
+package se.miun.dt176g.xxxxyyyy.reactive.shapes;
 
 
 import javafx.scene.canvas.GraphicsContext;
@@ -50,14 +50,6 @@ public abstract class Shape implements Drawable, Serializable {
      * Abstract method to draw the concrete shape in a GUI.
      */
     public abstract void draw(GraphicsContext graphicsContext);
-
-    protected void tester() {
-        System.out.println("working");
-    }
-
-    protected String getString() {
-        return "this is a shape";
-    }
 
 	
 }

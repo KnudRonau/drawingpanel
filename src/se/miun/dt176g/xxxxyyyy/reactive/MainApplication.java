@@ -1,7 +1,6 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -15,19 +14,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
+import se.miun.dt176g.xxxxyyyy.reactive.shapes.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
- * <h1>MainApplication</h1> Acts as the programs starting point and GUI.
- *
- * Extends JavaFx' {@link Application} class.
+ * <h1>MainApplication</h1> Acts as the programs starting point and GUI.*
+ * Extends JavaFx {@link Application} class.
  *
  * @author 	--Knud Ronau Larsen--
  * @version 1.0
@@ -64,9 +61,6 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-
-
-
         //Sets up a canvas and instantiates relevant fields
         stage.setTitle("Drawing Area");
         canvas = new Canvas(1200, 800);
@@ -83,44 +77,9 @@ public class MainApplication extends Application {
         Observable<MouseEvent> mouseReleased = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_RELEASED);
 
 
-
         //Subscribes correct function to the emission based on currently toggled toggleButton
         Observable.merge(mousePressed, mouseReleased, mouseDragged)
-                .subscribe(e -> {
-                    if(lineButton.isSelected()) {
-                        line(e);
-                    } else if(rectangleButton.isSelected()) {
-                        rectangle(e);
-                    } else if(ovalButton.isSelected()) {
-                        oval(e);
-                    } else if(freehandButton.isSelected()) {
-                        freehand(e);
-                    }
-                });
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
-
-        Shape testObj = new CustomLine(new Point(10, 10),new Point(100, 100), gc);
-
-//        objectOutputStream.writeObject("hej");
-//        objectOutputStream.writeObject("hej igen");
-//        System.out.println(testObj);
-//        objectOutputStream.writeObject(testObj);
-//        objectOutputStream.reset();
-
-//        Observable.<Shape>create(socket)
-//                .subscribeOn(Schedulers.io())
-//                .map(Socket::getInputStream)
-//                .map(ObjectInputStream::new)
-//                .flatMap(objectInputStream -> Observable.create(shape -> {
-//                    try {
-//                        while(true) {
-//                            shape
-//                        }
-//                    }
-//        })
+                .subscribe(this::createShape);
 
         Observable.just(socket)
                 .subscribeOn(Schedulers.io())
@@ -135,41 +94,28 @@ public class MainApplication extends Application {
                         System.out.println("Disconnected" + ioException);
                     }
                 }).map(shape -> (Shape) shape))
-                        .subscribe(this::draw);
+                .subscribe(this::draw);
 
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
 
-        //ChoiceDialog<String> serverClientChoice = choice();
-        //serverClientChoice.show();
+    private void createShape(MouseEvent mouseEvent) {
+        if(freehandButton.isSelected()) {
+            freehand(mouseEvent);
+        } else {
+            twoPointShape(mouseEvent);
+        }
     }
 
     private void draw(Shape shape) {
         shape.draw(gc);
     }
-    private void receiveTest(Shape shape) {
-        shape.tester();
-        System.out.println(shape.lineWidth);
-    }
 
-    private ChoiceDialog<String> choice() {
-        String choices[] = {"Server", "Client"};
-        ChoiceDialog<String> dialog = new ChoiceDialog<String>(choices[0], choices);
-        dialog.setTitle("Choose user type");
-        dialog.setHeaderText("Please select what kind of user you are");
-        dialog.setContentText("Selected user:");
-
-        Optional<String> result = dialog.showAndWait();
-//        if(result.isPresent()) {
-//            System.out.println(result);
-//        }
-        if(result.isPresent() && result.get().equals(choices[0])) {
-            System.out.println("Server starting");
-        } else if(result.isPresent() && result.get().equals(choices[1])) {
-            System.out.println("Client starting");
-        }
-
-        return dialog;
-
-
+    private void sendToServer(Shape shape) throws IOException {
+        objectOutputStream.writeObject(shape);
+        objectOutputStream.flush();
     }
 
     /**
@@ -184,7 +130,12 @@ public class MainApplication extends Application {
             dots.add(makeToPoint(mouseEvent));
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
             dots.add(makeToPoint(mouseEvent));
-            drawings.addShape(new Freehand(dots, gc));
+            try {
+                sendToServer(new Freehand(dots, gc));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
@@ -195,6 +146,27 @@ public class MainApplication extends Application {
      */
     private Point makeToPoint(MouseEvent mouseEvent) {
         return new Point((int)mouseEvent.getX(), (int)mouseEvent.getY());
+    }
+
+    private void twoPointShape(MouseEvent mouseEvent) {
+        TwoPointShape twoPointShape = null;
+        if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
+            firstPoint = makeToPoint(mouseEvent);
+        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
+            Point secondPoint = makeToPoint(mouseEvent);
+            if(lineButton.isSelected()) {
+                twoPointShape = new CustomLine(firstPoint, secondPoint, gc);
+            } else if (ovalButton.isSelected()) {
+                twoPointShape = new CustomOval(firstPoint, secondPoint, gc);
+            } else if(rectangleButton.isSelected()){
+                twoPointShape = new CustomRectangle(firstPoint, secondPoint, gc);
+            }
+            try {
+                sendToServer(twoPointShape);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
     }
 
     /**

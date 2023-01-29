@@ -1,7 +1,6 @@
-package se.miun.dt176g.xxxxyyyy.reactive;
+package se.miun.dt176g.xxxxyyyy.reactive.shapes;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 /**
  * <h1>CustomLine</h1> Concrete implementation of {@link  TwoPointShape} representing a straight line.

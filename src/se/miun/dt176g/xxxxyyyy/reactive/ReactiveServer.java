@@ -7,17 +7,20 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
 import io.reactivex.rxjava3.subjects.Subject;
+import se.miun.dt176g.xxxxyyyy.reactive.shapes.Shape;
 
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.cert.CertificateEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ReactiveServer {
 
     public class ConnectError extends Throwable {
+        @Serial
         private static final long serialVersionUID = 1L;
         private final Socket socket;
 
@@ -92,14 +95,14 @@ public class ReactiveServer {
 
     }
 
-    private void listenToSocket(Socket socket) throws IOException{
-        //System.out.println("listen run");
+    private void listenToSocket(Socket socket) {
         //inject all incoming messages from this socket to the message stream
 
         Observable.<Shape>create(emitter -> {
             Observable.just(socket)
                     .map(Socket::getInputStream)
                     .map(ObjectInputStream::new)
+                    .onErrorComplete(err -> err instanceof ConnectError)
                     .subscribe(objectInputStream -> {
                         while (!emitter.isDisposed()) {
                             Shape toShape = (Shape) objectInputStream.readObject();
@@ -111,7 +114,7 @@ public class ReactiveServer {
                                     emitter.onNext(toShape);
                             }
                         }
-                    });
+                    }, err -> System.err.println(err.getMessage()));
         })
 
                 .subscribeOn(Schedulers.io())

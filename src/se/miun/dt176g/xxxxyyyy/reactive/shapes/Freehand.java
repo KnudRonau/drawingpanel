@@ -1,4 +1,4 @@
-package se.miun.dt176g.xxxxyyyy.reactive;
+package se.miun.dt176g.xxxxyyyy.reactive.shapes;
 
 import javafx.scene.canvas.GraphicsContext;
 
@@ -22,7 +22,7 @@ public class Freehand extends Shape {
      * @param dots ArrayList containing all the drawing's points.
      * @param graphicsContext used for drawing attributes.
      */
-    Freehand(ArrayList<Point> dots, GraphicsContext graphicsContext) {
+    public Freehand(ArrayList<Point> dots, GraphicsContext graphicsContext) {
         super(graphicsContext);
         this.dots = dots;
     }
