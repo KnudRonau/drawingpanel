@@ -31,9 +31,9 @@ public class Freehand extends Shape {
      * Draws a free-handed drawing by connecting all the points with a straight line.
      */
     @Override
-    public void draw() {
+    public void draw(GraphicsContext graphicsContext) {
         for(int i = 0; i + 1 < dots.size(); i++) {
-            graphicsContext.strokeLine(dots.get(i).x(), dots.get(i).y(),dots.get(i+1).x(),dots.get(i+1).y());
+            createGraphicsContext(graphicsContext).strokeLine(dots.get(i).x(), dots.get(i).y(),dots.get(i+1).x(),dots.get(i+1).y());
         }
     }
 }

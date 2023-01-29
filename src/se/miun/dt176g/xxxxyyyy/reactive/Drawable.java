@@ -1,5 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
+import javafx.scene.canvas.GraphicsContext;
+
 /**
  * <h1>Drawable</h1> Interface implemented by {@link Shape}.
  *
@@ -11,5 +13,5 @@ package se.miun.dt176g.xxxxyyyy.reactive;
 
 @FunctionalInterface
 interface Drawable {
-	void draw();
+	void draw(GraphicsContext graphicsContext);
 }

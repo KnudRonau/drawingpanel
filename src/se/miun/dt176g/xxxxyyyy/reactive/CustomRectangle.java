@@ -29,9 +29,9 @@ public class CustomRectangle extends TwoPointShape{
      * Calls fixCoordsForDrawing() first as Point values could otherwise end up negative.
      */
     @Override
-    public void draw() {
+    public void draw(GraphicsContext graphicsContext) {
         fixCoordsForDrawing();
-        graphicsContext.strokeRect(firstPoint.x(), firstPoint.y(),
+        createGraphicsContext(graphicsContext).strokeRect(firstPoint.x(), firstPoint.y(),
                 secondPoint.x() - firstPoint.x(), secondPoint.y() - firstPoint.y());
     }
 }

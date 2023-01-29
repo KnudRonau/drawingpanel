@@ -50,5 +50,5 @@ public abstract class TwoPointShape extends Shape{
      * Abstract method to draw the concrete shape in a GUI.
      */
     @Override
-    public abstract void draw();
+    public abstract void draw(GraphicsContext graphicsContext);
 }

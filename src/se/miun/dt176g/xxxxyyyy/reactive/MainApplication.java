@@ -1,15 +1,14 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -17,7 +16,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * <h1>MainApplication</h1> Acts as the programs starting point and GUI.
@@ -38,12 +43,17 @@ public class MainApplication extends Application {
     private Drawings drawings;
     private Point firstPoint;
     private ArrayList<Point> dots;
+    private static Socket socket;
+    private static ObjectOutputStream objectOutputStream;
+
 
     /**
      * The programs main method. Starts the program and launches the GUI.
      * @param args provided arguments.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        socket = new Socket("localhost", 12345);
+        objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         launch(args);
     }
 
@@ -52,13 +62,16 @@ public class MainApplication extends Application {
      * @param stage GUI stage.
      */
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws IOException {
+
+
+
 
         //Sets up a canvas and instantiates relevant fields
         stage.setTitle("Drawing Area");
-        drawings = new Drawings();
         canvas = new Canvas(1200, 800);
         gc = canvas.getGraphicsContext2D();
+        drawings = new Drawings(gc);
         BorderPane root = new BorderPane();
         root.setCenter(canvas);
         //adds toggleButtons and regular buttons to the BorderPane
@@ -68,6 +81,8 @@ public class MainApplication extends Application {
         Observable<MouseEvent> mousePressed = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_PRESSED);
         Observable<MouseEvent> mouseDragged = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_DRAGGED);
         Observable<MouseEvent> mouseReleased = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_RELEASED);
+
+
 
         //Subscribes correct function to the emission based on currently toggled toggleButton
         Observable.merge(mousePressed, mouseReleased, mouseDragged)
@@ -86,6 +101,75 @@ public class MainApplication extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+
+        Shape testObj = new CustomLine(new Point(10, 10),new Point(100, 100), gc);
+
+//        objectOutputStream.writeObject("hej");
+//        objectOutputStream.writeObject("hej igen");
+//        System.out.println(testObj);
+//        objectOutputStream.writeObject(testObj);
+//        objectOutputStream.reset();
+
+//        Observable.<Shape>create(socket)
+//                .subscribeOn(Schedulers.io())
+//                .map(Socket::getInputStream)
+//                .map(ObjectInputStream::new)
+//                .flatMap(objectInputStream -> Observable.create(shape -> {
+//                    try {
+//                        while(true) {
+//                            shape
+//                        }
+//                    }
+//        })
+
+        Observable.just(socket)
+                .subscribeOn(Schedulers.io())
+                .map(Socket::getInputStream)
+                .map(ObjectInputStream::new)
+                .flatMap(objectInputStream -> Observable.create(shape -> {
+                    try {
+                        while (true) {
+                            shape.onNext(objectInputStream.readObject());
+                        }
+                    } catch (IOException ioException) {
+                        System.out.println("Disconnected" + ioException);
+                    }
+                }).map(shape -> (Shape) shape))
+                        .subscribe(this::draw);
+
+
+        //ChoiceDialog<String> serverClientChoice = choice();
+        //serverClientChoice.show();
+    }
+
+    private void draw(Shape shape) {
+        shape.draw(gc);
+    }
+    private void receiveTest(Shape shape) {
+        shape.tester();
+        System.out.println(shape.lineWidth);
+    }
+
+    private ChoiceDialog<String> choice() {
+        String choices[] = {"Server", "Client"};
+        ChoiceDialog<String> dialog = new ChoiceDialog<String>(choices[0], choices);
+        dialog.setTitle("Choose user type");
+        dialog.setHeaderText("Please select what kind of user you are");
+        dialog.setContentText("Selected user:");
+
+        Optional<String> result = dialog.showAndWait();
+//        if(result.isPresent()) {
+//            System.out.println(result);
+//        }
+        if(result.isPresent() && result.get().equals(choices[0])) {
+            System.out.println("Server starting");
+        } else if(result.isPresent() && result.get().equals(choices[1])) {
+            System.out.println("Client starting");
+        }
+
+        return dialog;
+
+
     }
 
     /**
@@ -122,6 +206,12 @@ public class MainApplication extends Application {
             firstPoint = makeToPoint(mouseEvent);
         } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
             drawings.addShape(new CustomLine(firstPoint, makeToPoint(mouseEvent), gc));
+            try {
+                objectOutputStream.writeObject(new CustomLine(firstPoint, makeToPoint(mouseEvent), gc));
+                objectOutputStream.reset();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 

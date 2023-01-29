@@ -29,9 +29,9 @@ public class CustomOval extends TwoPointShape{
      * Calls fixCoordsForDrawing() first as Point values could otherwise end up negative.
      */
     @Override
-    public void draw() {
+    public void draw(GraphicsContext graphicsContext) {
         fixCoordsForDrawing();
-        graphicsContext.strokeOval(firstPoint.x(), firstPoint.y(),
+        createGraphicsContext(graphicsContext).strokeOval(firstPoint.x(), firstPoint.y(),
                 secondPoint.x() - firstPoint.x(), secondPoint.y() - firstPoint.y());
     }
 }

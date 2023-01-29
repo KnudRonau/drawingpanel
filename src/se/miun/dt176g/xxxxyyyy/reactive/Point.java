@@ -1,5 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
+import java.io.Serializable;
+
 /**
  * <h1>Point</h1> Helper class to create (x,y) coordinates as objects and easily manipulate them.
  *
@@ -8,7 +10,7 @@ package se.miun.dt176g.xxxxyyyy.reactive;
  * @since 	2022-09-08
  */
 
-public class Point {
+public class Point implements Serializable {
 
 	private int x, y;
 

@@ -1,5 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
+import javafx.scene.canvas.GraphicsContext;
+
 import java.util.ArrayList;
 
 /**
@@ -13,12 +15,14 @@ import java.util.ArrayList;
  */
 
 public class Drawings {
+	private GraphicsContext graphicsContext;
 	private ArrayList<Shape> drawingsList;
 
 	/**
 	 * Constructor initializing the ArrayList.
 	 */
-	public Drawings() {
+	public Drawings(GraphicsContext graphicsContext) {
+		this.graphicsContext = graphicsContext;
 		drawingsList = new ArrayList<>();
 	}
 
@@ -30,7 +34,7 @@ public class Drawings {
 	 */
 	public void addShape(Shape s) {
 		drawingsList.add(s);
-		draw();
+		draw(graphicsContext);
 	}
 
 	/**
@@ -43,9 +47,9 @@ public class Drawings {
 	/**
 	 * Traverses the ArrayList and draws all the objects.
 	 */
-	public void draw() {
+	public void draw(GraphicsContext graphicsContext) {
 		for (Shape s : drawingsList) {
-			s.draw();
+			s.draw(graphicsContext);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package se.miun.dt176g.xxxxyyyy.reactive;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 /**
  * <h1>CustomLine</h1> Concrete implementation of {@link  TwoPointShape} representing a straight line.
@@ -28,7 +29,7 @@ public class CustomLine extends TwoPointShape {
      * Implementation of draw using strokeLine to draw the line.
      */
     @Override
-    public void draw() {
-        graphicsContext.strokeLine(firstPoint.x(), firstPoint.y(), secondPoint.x(), secondPoint.y());
+    public void draw(GraphicsContext graphicsContext) {
+        createGraphicsContext(graphicsContext).strokeLine(firstPoint.x(), firstPoint.y(), secondPoint.x(), secondPoint.y());
     }
 }
