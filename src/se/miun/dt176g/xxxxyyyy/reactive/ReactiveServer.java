@@ -7,7 +7,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.ReplaySubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import javafx.application.Application;
 import se.miun.dt176g.xxxxyyyy.reactive.shapes.Shape;
 
 
@@ -47,7 +46,7 @@ public class ReactiveServer {
     private Map<Integer, Disposable> shapeDisposables;
 
     private Subject<Socket> connections;
-    private Subject<Shape> shapeStream;   //all messages from all clients
+    private Subject<Shape> shapeStream;   //all shapes from all clients
     private ServerSocket serverSocket;
     private boolean acceptConnections = true;
 
@@ -132,7 +131,7 @@ public class ReactiveServer {
                     .subscribe(objectInputStream -> {
                         while (!emitter.isDisposed()) {
                             Shape shape = (Shape) objectInputStream.readObject();
-                            if (shape == null ||socket.isClosed()) {
+                            if (shape == null || socket.isClosed()) {
                                 emitter.onError(new ConnectError(socket));
                             } else {
                                     emitter.onNext(shape);

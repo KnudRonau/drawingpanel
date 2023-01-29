@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
@@ -92,7 +91,8 @@ public class MainApplication extends Application {
                         ioException.printStackTrace();
                     }
                 }).map(shape -> (Shape) shape))
-                .subscribe(this::draw);
+                .subscribe(this::draw
+                        , err -> System.err.println(err.getMessage()));
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -230,9 +230,7 @@ public class MainApplication extends Application {
         //Clear the canvas for only this client, so other clients can still enjoy their art
         Button clearButton = new Button("Clear canvas!");
         Observable<ActionEvent> clearEvent = JavaFxObservable.actionEventsOf(clearButton);
-        clearEvent.subscribe(event -> {
-            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        });
+        clearEvent.subscribe(event -> gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()));
 
         //Add all buttons to the HBox
         buttonBox.getChildren().addAll(rectangleButton, ovalButton, lineButton,
