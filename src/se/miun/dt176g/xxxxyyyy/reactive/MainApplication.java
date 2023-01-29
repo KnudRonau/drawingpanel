@@ -20,14 +20,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
- * <h1>MainApplication</h1> Acts as the programs starting point and GUI.*
+ * <h1>MainApplication</h1> Acts as the client's starting point and GUI.*
  * Extends JavaFx {@link Application} class.
  *
  * @author 	--Knud Ronau Larsen--
- * @version 1.0
+ * @version 2.0
  * @since 	2022-01-20
  */
 public class MainApplication extends Application {
@@ -37,15 +38,13 @@ public class MainApplication extends Application {
     private ToggleButton ovalButton;
     private ToggleButton freehandButton;
     private GraphicsContext gc;
-    private Drawings drawings;
     private Point firstPoint;
     private ArrayList<Point> dots;
     private static Socket socket;
     private static ObjectOutputStream objectOutputStream;
 
-
     /**
-     * The programs main method. Starts the program and launches the GUI.
+     * The clients main method. Starts the program and launches the GUI.
      * @param args provided arguments.
      */
     public static void main(String[] args) throws IOException {
@@ -55,17 +54,16 @@ public class MainApplication extends Application {
     }
 
     /**
-     * Sets up the GUI, creates Observable events and subscribes relevant method to emission based.
+     * Sets up the GUI, creates Observables and subscribes relevant method to emissions.
      * @param stage GUI stage.
      */
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException{
 
         //Sets up a canvas and instantiates relevant fields
         stage.setTitle("Drawing Area");
         canvas = new Canvas(1200, 800);
         gc = canvas.getGraphicsContext2D();
-        drawings = new Drawings(gc);
         BorderPane root = new BorderPane();
         root.setCenter(canvas);
         //adds toggleButtons and regular buttons to the BorderPane
@@ -76,22 +74,22 @@ public class MainApplication extends Application {
         Observable<MouseEvent> mouseDragged = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_DRAGGED);
         Observable<MouseEvent> mouseReleased = JavaFxObservable.eventsOf(canvas, MouseEvent.MOUSE_RELEASED);
 
-
-        //Subscribes correct function to the emission based on currently toggled toggleButton
+        //Merges the MouseEvents and calls createShape with it
         Observable.merge(mousePressed, mouseReleased, mouseDragged)
                 .subscribe(this::createShape);
 
+        //Handles incoming Shapes from Server via socket and calls drawing of Shapes
         Observable.just(socket)
                 .subscribeOn(Schedulers.io())
                 .map(Socket::getInputStream)
                 .map(ObjectInputStream::new)
                 .flatMap(objectInputStream -> Observable.create(shape -> {
                     try {
-                        while (true) {
+                        while (!socket.isClosed()) {
                             shape.onNext(objectInputStream.readObject());
                         }
                     } catch (IOException ioException) {
-                        System.out.println("Disconnected" + ioException);
+                        ioException.printStackTrace();
                     }
                 }).map(shape -> (Shape) shape))
                 .subscribe(this::draw);
@@ -113,9 +111,9 @@ public class MainApplication extends Application {
         shape.draw(gc);
     }
 
-    private void sendToServer(Shape shape) throws IOException {
+    private void sendToServer(Shape shape) throws IOException, RuntimeException {
         objectOutputStream.writeObject(shape);
-        objectOutputStream.flush();
+        objectOutputStream.reset();
     }
 
     /**
@@ -135,7 +133,6 @@ public class MainApplication extends Application {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
         }
     }
 
@@ -163,51 +160,9 @@ public class MainApplication extends Application {
             }
             try {
                 sendToServer(twoPointShape);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }
-    }
-
-    /**
-     * creates a new {@link CustomLine} object and adds it to the {@link Drawings} container
-     * @param mouseEvent provided mouseEvent
-     */
-    private void line(MouseEvent mouseEvent) {
-        if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            firstPoint = makeToPoint(mouseEvent);
-        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            drawings.addShape(new CustomLine(firstPoint, makeToPoint(mouseEvent), gc));
-            try {
-                objectOutputStream.writeObject(new CustomLine(firstPoint, makeToPoint(mouseEvent), gc));
-                objectOutputStream.reset();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * creates a new {@link CustomRectangle} object and adds it to the {@link Drawings} container
-     * @param mouseEvent provided mouseEvent
-     */
-    private void rectangle(MouseEvent mouseEvent) {
-        if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            firstPoint = makeToPoint(mouseEvent);
-        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            drawings.addShape(new CustomRectangle(firstPoint, makeToPoint(mouseEvent), gc));
-        }
-    }
-
-    /**
-     * creates a new {@link CustomOval} object and adds it to the {@link Drawings} container
-     * @param mouseEvent provided mouseEvent
-     */
-    private void oval(MouseEvent mouseEvent) {
-        if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
-            firstPoint = makeToPoint(mouseEvent);
-        } else if(mouseEvent.getEventType().equals(MouseEvent.MOUSE_RELEASED)) {
-            drawings.addShape(new CustomOval(firstPoint, makeToPoint(mouseEvent), gc));
         }
     }
 
@@ -255,12 +210,11 @@ public class MainApplication extends Application {
             }
         });
 
-        //Clear the canvas and container when an ActionEvent is emitted from the clearButton
+        //Clear the canvas for only this client, so other clients can still enjoy their art
         Button clearButton = new Button("Clear canvas!");
         Observable<ActionEvent> clearEvent = JavaFxObservable.actionEventsOf(clearButton);
         clearEvent.subscribe(event -> {
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawings.emptyDrawings();
         });
 
         //Add all buttons to the HBox

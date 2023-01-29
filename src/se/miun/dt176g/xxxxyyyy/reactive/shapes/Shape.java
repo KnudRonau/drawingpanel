@@ -12,13 +12,12 @@ import java.io.Serializable;
  * This class consists of the attribute common to all shapes, GraphicsContext.
  * 
  * @author 	--Knud Ronau Larsen--
- * @version 1.0
+ * @version 1.1
  * @since 	2022-09-08
  */
 
 public abstract class Shape implements Drawable, Serializable {
 
-    //protected GraphicsContext graphicsContext;
     protected Double lineWidth;
     protected Boolean isBlack;
 
@@ -36,6 +35,11 @@ public abstract class Shape implements Drawable, Serializable {
 
     }
 
+    /**
+     * Updates provided graphicsContext to match stored values. Makes serialize possible.
+     * @param graphicsContext graphicsContext for drawing
+     * @return updated graphicsContext
+     */
     protected GraphicsContext createGraphicsContext(GraphicsContext graphicsContext) {
         graphicsContext.setLineWidth(this.lineWidth);
         if(isBlack) {

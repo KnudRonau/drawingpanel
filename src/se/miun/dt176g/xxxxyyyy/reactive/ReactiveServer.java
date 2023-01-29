@@ -13,7 +13,7 @@ import se.miun.dt176g.xxxxyyyy.reactive.shapes.Shape;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.cert.CertificateEncodingException;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,11 +23,9 @@ public class ReactiveServer {
         @Serial
         private static final long serialVersionUID = 1L;
         private final Socket socket;
-
         public ConnectError(Socket socket) {
             this.socket = socket;
         }
-
         public Socket getSocket() {
             return socket;
         }
@@ -105,23 +103,19 @@ public class ReactiveServer {
                     .onErrorComplete(err -> err instanceof ConnectError)
                     .subscribe(objectInputStream -> {
                         while (!emitter.isDisposed()) {
-                            Shape toShape = (Shape) objectInputStream.readObject();
-                            if (toShape == null ||socket.isClosed()) {
+                            Shape shape = (Shape) objectInputStream.readObject();
+                            if (shape == null ||socket.isClosed()) {
                                 emitter.onError(new ConnectError(socket));
-                                //System.out.println("second");
                             } else {
-                                    //System.out.println("third");
-                                    emitter.onNext(toShape);
+                                    emitter.onNext(shape);
                             }
                         }
                     }, err -> System.err.println(err.getMessage()));
         })
-
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe(d -> disposables.put(socket.hashCode(), d))
                 .doOnError(this::handleError)
                 .onErrorComplete(err -> err instanceof ConnectError)
-                //.doOnNext(shape -> shape.tester())
                 .subscribe(shapeStream::onNext,
                         err -> System.err.println(err.getMessage()),
                         () -> System.out.println("Socket closed"));
@@ -129,17 +123,19 @@ public class ReactiveServer {
             shapeStream
                     .subscribeOn(Schedulers.io())
                     .doOnSubscribe(d -> shapeDisposables.put(socket.hashCode(), d))
-                    .withLatestFrom(socketToOutputStream(socket), (s, oos) -> {
-                        oos.writeObject(s);
-                        oos.flush();
+                    .withLatestFrom(socketToObjectOutputStream(socket), (s, oos) -> {
+                        try {
+                            oos.writeObject(s);
+                            oos.flush();
+                        }catch (SocketException e) {
+                            e.printStackTrace();
+                        }
                         return true;
                     })
                     .subscribe();
-
     }
 
-
-    Observable<ObjectOutputStream> socketToOutputStream(Socket socket) {
+    Observable<ObjectOutputStream> socketToObjectOutputStream(Socket socket) {
         return Observable.just(socket)
                 .map(Socket::getOutputStream)
                 .map(ObjectOutputStream::new);
@@ -148,7 +144,6 @@ public class ReactiveServer {
     private void shutdown() {
         acceptConnections = false;
     }
-
 
     private void handleError(Throwable error) {
         if (error instanceof ConnectError) {
@@ -159,6 +154,5 @@ public class ReactiveServer {
             shapeDisposables.remove(socket.hashCode());
         }
     }
-
 }
 
